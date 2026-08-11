@@ -348,43 +348,21 @@
     '<circle cx="17.7" cy="12" r="1" fill="#fff"/>' +
     '</svg>';
 
-  var STORAGE_AVAILABLE = typeof window.storage !== 'undefined';
-
-  function loadFromBrowserStorage(){
-    try{
-      var raw = window.localStorage.getItem(STORAGE_KEY);
-      if(raw){ loggedDates = JSON.parse(raw) || {}; }
-    }catch(e){}
-    render();
-  }
-
-  function saveToBrowserStorage(){
-    try{ window.localStorage.setItem(STORAGE_KEY, JSON.stringify(loggedDates)); }catch(e){}
-  }
-
   function loadData(){
-    if(STORAGE_AVAILABLE){
-      window.storage.get(STORAGE_KEY).then(function(res){
-        if(res && res.value){
-          try{ loggedDates = JSON.parse(res.value) || {}; }catch(e){ loggedDates = {}; }
-        }
-        render();
-      }).catch(function(){
-        loadFromBrowserStorage();
-      });
-      return;
-    }
-    loadFromBrowserStorage();
+    fetch('/api/log').then(function(r){ return r.json(); }).then(function(data){
+      loggedDates = (data && data.loggedDates) || {};
+      render();
+    }).catch(function(){
+      render();
+    });
   }
 
   function saveData(){
-    if(STORAGE_AVAILABLE){
-      window.storage.set(STORAGE_KEY, JSON.stringify(loggedDates)).catch(function(){
-        saveToBrowserStorage();
-      });
-      return;
-    }
-    saveToBrowserStorage();
+    fetch('/api/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ loggedDates: loggedDates })
+    }).catch(function(){});
   }
 
   function showToast(msg){
