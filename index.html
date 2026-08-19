@@ -412,23 +412,29 @@
     }
   }
 
-  function toggleDay(dateISO, dateObj, cardEl){
+  function toggleDay(dateISO, dateObj){
     if(dateObj > today) return;
+
+    var weekIdx = Math.floor((dateObj - START_DATE) / (7 * 86400000));
+    var wasDone = weekLoggedCount(weekIdx) >= GOAL_PER_WEEK;
+
     if(loggedDates[dateISO]){
       delete loggedDates[dateISO];
     } else {
       loggedDates[dateISO] = true;
     }
     saveData();
-    var prevSuccessful = window._lastSuccessful || 0;
     render();
-    var nowSuccessful = successfulWeeksCount();
-    if(nowSuccessful > prevSuccessful){
-      var justFinishedCard = document.querySelector('.week-card.done:last-of-type');
+
+    var nowDone = weekLoggedCount(weekIdx) >= GOAL_PER_WEEK;
+
+    if(!wasDone && nowDone){
+      var justFinishedCard = document.querySelector('.week-card[data-week-idx="' + weekIdx + '"]');
       if(justFinishedCard){
         justFinishedCard.classList.add('celebrate');
         burstConfetti(justFinishedCard);
       }
+      var nowSuccessful = successfulWeeksCount();
       if(nowSuccessful % WEEKS_PER_PRIZE === 0){
         showToast('Prize unlocked! You crushed ' + WEEKS_PER_PRIZE + ' green weeks!');
         celebratePrize();
@@ -436,7 +442,6 @@
         showToast('Nice! That week just turned green.');
       }
     }
-    window._lastSuccessful = nowSuccessful;
   }
 
   function celebratePrize(){
@@ -495,6 +500,7 @@
 
       var card = document.createElement('div');
       card.className = 'week-card' + (done ? ' done' : '');
+      card.setAttribute('data-week-idx', w);
 
       var top = document.createElement('div');
       top.className = 'week-top';
@@ -529,9 +535,9 @@
           btn.innerHTML = barbellSVG;
           btn.setAttribute('aria-label', 'Log workout for ' + fmtShort(dObj));
           if(!isFuture){
-            btn.addEventListener('click', (function(dISO, dObj, card){
-              return function(){ toggleDay(dISO, dObj, card); };
-            })(dISO, dObj, card));
+            btn.addEventListener('click', (function(dISO, dObj){
+              return function(){ toggleDay(dISO, dObj); };
+            })(dISO, dObj));
           }
 
           var num = document.createElement('div');
@@ -557,9 +563,7 @@
     render();
   });
 
-  window._lastSuccessful = 0;
   loadData();
-  window._lastSuccessful = successfulWeeksCount();
 
 })();
 </script>
