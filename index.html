@@ -195,6 +195,72 @@
   .day-btn.future{ opacity: 0.45; cursor: default; }
   .day-btn.future:hover{ transform:none; }
 
+  .past-label{
+    font-family:'Baloo 2',cursive;
+    font-weight:700;
+    font-size:15px;
+    color: var(--ink-soft);
+    text-align:center;
+    margin: 12px 0 -4px;
+  }
+  .surprise-overlay{
+    position:fixed; inset:0;
+    background: rgba(74,51,80,0.55);
+    display:none;
+    align-items:center; justify-content:center;
+    z-index:100; padding:20px;
+  }
+  .surprise-overlay.show{ display:flex; animation: surpriseFade 0.3s ease; }
+  @keyframes surpriseFade{ from{ opacity:0; } to{ opacity:1; } }
+  .surprise-card{
+    background:#fff;
+    border:3px solid var(--card-border);
+    border-radius:32px;
+    box-shadow:0 8px 0 var(--shadow);
+    max-width:380px; width:100%;
+    padding:30px 24px 26px;
+    text-align:center;
+    position:relative;
+  }
+  .surprise-close{
+    position:absolute; top:12px; right:14px;
+    background:none; border:0; font-size:22px; line-height:1;
+    color: var(--ink-soft); cursor:pointer;
+  }
+  .surprise-title{ font-family:'Baloo 2',cursive; font-size:30px; font-weight:800; margin:0 0 4px; color: var(--ink); }
+  .surprise-sub{ font-weight:700; color: var(--ink-soft); margin:0 0 14px; font-size:15px; }
+  .gift-btn{
+    background:none; border:0; padding:0; cursor:pointer;
+    animation: giftWiggle 1.1s ease-in-out infinite;
+    transform-origin: 50% 90%;
+  }
+  .gift-btn svg{ width:160px; height:160px; overflow:visible; }
+  @keyframes giftWiggle{
+    0%,100%{ transform: rotate(0deg) scale(1); }
+    20%{ transform: rotate(-6deg) scale(1.04); }
+    40%{ transform: rotate(6deg) scale(1.04); }
+    60%{ transform: rotate(-4deg) scale(1.02); }
+    80%{ transform: rotate(3deg) scale(1.02); }
+  }
+  .gift-lid{ transition: transform 0.65s cubic-bezier(.34,1.56,.64,1), opacity 0.65s ease; transform-origin: 50% 100%; }
+  .surprise-card.opening .gift-btn{ animation:none; }
+  .surprise-card.opening .gift-lid{ transform: translate(14px,-80px) rotate(-24deg); opacity:0; }
+  .gift-hint{ font-weight:800; font-size:13px; color: var(--pink-dark); text-transform:uppercase; letter-spacing:0.05em; margin-top:6px; }
+  .prize-reveal{ display:none; }
+  .surprise-card.opened .gift-stage{ display:none; }
+  .surprise-card.opened .prize-reveal{ display:block; animation: revealPop 0.7s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes revealPop{ from{ opacity:0; transform: scale(0.6); } to{ opacity:1; transform: scale(1); } }
+  .prize-reveal img{ width:170px; height:170px; object-fit:contain; border-radius:24px; animation: prizeBob 1s ease-in-out infinite; }
+  @keyframes prizeBob{ 0%,100%{ transform: translateY(0) rotate(-2deg); } 50%{ transform: translateY(-8px) rotate(2deg); } }
+  .prize-note{ font-family:'Baloo 2',cursive; font-weight:700; font-size:19px; color: var(--ink); margin:10px 0 16px; line-height:1.3; }
+  .surprise-done{
+    font-family:'Baloo 2',cursive; font-weight:800; font-size:17px;
+    background: var(--mint); color:#0F5C36;
+    border:3px solid var(--mint-dark); border-radius:20px;
+    padding:10px 30px; cursor:pointer; box-shadow:0 4px 0 var(--shadow);
+  }
+  .surprise-done:active{ transform: translateY(2px); box-shadow:0 2px 0 var(--shadow); }
+
   .load-more{
     display:block;
     margin: 22px auto 0;
@@ -293,11 +359,40 @@
 
   <div class="weeks" id="weeks"></div>
 
-  <button class="load-more" id="load-more">Show more weeks</button>
+  <button class="load-more" id="load-more">Show past weeks</button>
 
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="surprise-overlay" id="surprise-overlay" aria-hidden="true">
+  <div class="surprise-card" id="surprise-card">
+    <button class="surprise-close" id="surprise-close" aria-label="Close">&times;</button>
+    <div class="gift-stage">
+      <p class="surprise-title">8 weeks. You did it!</p>
+      <p class="surprise-sub">Romy left you a surprise&hellip;</p>
+      <button class="gift-btn" id="gift-btn" aria-label="Open your gift">
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <rect x="18" y="52" width="84" height="56" rx="8" fill="#FF8FAE" stroke="#E5678F" stroke-width="3"/>
+          <rect x="54" y="52" width="12" height="56" fill="#FFC94D"/>
+          <g class="gift-lid">
+            <rect x="12" y="34" width="96" height="22" rx="8" fill="#FF8FAE" stroke="#E5678F" stroke-width="3"/>
+            <rect x="54" y="34" width="12" height="22" fill="#FFC94D"/>
+            <path d="M60 34 C40 6 18 20 34 34 Z" fill="#FFC94D" stroke="#E0A415" stroke-width="2.5"/>
+            <path d="M60 34 C80 6 102 20 86 34 Z" fill="#FFC94D" stroke="#E0A415" stroke-width="2.5"/>
+          </g>
+        </svg>
+      </button>
+      <div class="gift-hint">Tap to open</div>
+    </div>
+    <div class="prize-reveal">
+      <p class="surprise-title">Prize unlocked!</p>
+      <img id="surprise-romy" alt="Romy celebrating">
+      <p class="prize-note" id="prize-note"></p>
+      <button class="surprise-done" id="surprise-done">Yay!</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -310,7 +405,9 @@
   var STORAGE_KEY = 'romy-workout-log';
 
   var loggedDates = {};
-  var visibleWeeks = WEEKS_PER_PAGE;
+  var pastShown = 0;
+  // Edit this to your real prize! It appears when the gift opens.
+  var PRIZE_NOTE = 'You showed up for 8 weeks straight. Go treat yourself \u2014 you earned it!';
   var today = new Date();
   today.setHours(0,0,0,0);
 
@@ -345,6 +442,20 @@
     var diffDays = Math.floor((today - START_DATE) / 86400000);
     var currentWeekIdx = Math.floor(diffDays/7);
     return Math.max(currentWeekIdx+1, 1);
+  }
+
+  // First week of the current prize cycle: the week right after the one
+  // that completed your most recent set of 8 green weeks.
+  function cycleStartIndex(){
+    var total = totalWeeksAvailable();
+    var count = 0, start = 0;
+    for(var i=0;i<total;i++){
+      if(weekLoggedCount(i) >= GOAL_PER_WEEK){
+        count++;
+        if(count % WEEKS_PER_PRIZE === 0) start = i + 1;
+      }
+    }
+    return Math.min(start, total - 1);
   }
 
   function successfulWeeksCount(){
@@ -438,11 +549,60 @@
       if(nowSuccessful % WEEKS_PER_PRIZE === 0){
         showToast('Prize unlocked! You crushed ' + WEEKS_PER_PRIZE + ' green weeks!');
         celebratePrize();
+        setTimeout(showPrizeSurprise, 1300);
       } else {
         showToast('Nice! That week just turned green.');
       }
     }
   }
+
+  function rainConfetti(){
+    var colors = ['#FF8FAE','#FFC94D','#6FD9A0','#6FC3E8','#B79CFF'];
+    for(var i=0;i<90;i++){
+      var el = document.createElement('div');
+      el.style.cssText = 'position:fixed;top:-16px;z-index:200;pointer-events:none;border-radius:2px;' +
+        'width:' + (6 + Math.random()*7) + 'px;height:' + (8 + Math.random()*8) + 'px;' +
+        'background:' + colors[i % colors.length] + ';left:' + (Math.random()*100) + 'vw';
+      document.body.appendChild(el);
+      var dur = 1800 + Math.random()*1800;
+      var drift = (Math.random()-0.5)*160;
+      el.animate([
+        { transform: 'translate(0,0) rotate(0deg)', opacity: 1 },
+        { transform: 'translate(' + drift + 'px,' + (window.innerHeight + 40) + 'px) rotate(' + (Math.random()*900) + 'deg)', opacity: 1 }
+      ], { duration: dur, delay: Math.random()*600, easing: 'cubic-bezier(.3,.6,.5,1)', fill: 'both' });
+      (function(el, t){ setTimeout(function(){ el.remove(); }, t); })(el, dur + 800);
+    }
+  }
+
+  function showPrizeSurprise(){
+    var ov = document.getElementById('surprise-overlay');
+    var card = document.getElementById('surprise-card');
+    card.className = 'surprise-card';
+    document.getElementById('prize-note').textContent = PRIZE_NOTE;
+    var mascot = document.querySelector('#mascot-slot .mascot-img');
+    var romy = document.getElementById('surprise-romy');
+    if(mascot && romy) romy.src = mascot.src;
+    ov.className = 'surprise-overlay show';
+    ov.setAttribute('aria-hidden', 'false');
+  }
+
+  function hidePrizeSurprise(){
+    var ov = document.getElementById('surprise-overlay');
+    ov.className = 'surprise-overlay';
+    ov.setAttribute('aria-hidden', 'true');
+  }
+
+  document.getElementById('gift-btn').addEventListener('click', function(){
+    var card = document.getElementById('surprise-card');
+    if(card.classList.contains('opening')) return;
+    card.classList.add('opening');
+    setTimeout(function(){
+      card.classList.add('opened');
+      rainConfetti();
+    }, 750);
+  });
+  document.getElementById('surprise-close').addEventListener('click', hidePrizeSurprise);
+  document.getElementById('surprise-done').addEventListener('click', hidePrizeSurprise);
 
   function celebratePrize(){
     var slot = document.getElementById('mascot-slot');
@@ -472,7 +632,7 @@
 
   function render(){
     var total = totalWeeksAvailable();
-    var shown = Math.min(visibleWeeks, total);
+    var cycleStart = cycleStartIndex();
     var successCount = successfulWeeksCount();
     var cyclePos = successCount % WEEKS_PER_PRIZE;
 
@@ -492,7 +652,19 @@
     var weeksEl = document.getElementById('weeks');
     weeksEl.innerHTML = '';
 
-    for(var w = shown - 1; w >= 0; w--){
+    var order = [];
+    for(var cw = total - 1; cw >= cycleStart; cw--) order.push(cw);
+    var pastEnd = Math.max(0, cycleStart - pastShown);
+    for(var pw = cycleStart - 1; pw >= pastEnd; pw--) order.push(pw);
+
+    for(var oi = 0; oi < order.length; oi++){
+      var w = order[oi];
+      if(w === cycleStart - 1){
+        var lbl = document.createElement('div');
+        lbl.className = 'past-label';
+        lbl.textContent = 'Past weeks';
+        weeksEl.appendChild(lbl);
+      }
       var start = weekStart(w);
       var end = addDays(start, 6);
       var count = weekLoggedCount(w);
@@ -555,15 +727,20 @@
       weeksEl.appendChild(card);
     }
 
-    document.getElementById('load-more').style.display = (shown >= total) ? 'none' : 'block';
+    document.getElementById('load-more').style.display = (pastEnd > 0) ? 'block' : 'none';
   }
 
   document.getElementById('load-more').addEventListener('click', function(){
-    visibleWeeks += WEEKS_PER_PAGE;
+    pastShown += WEEKS_PER_PAGE;
     render();
   });
 
   loadData();
+
+  // Preview the surprise any time by adding ?surprise to the page address
+  if(window.location.search.indexOf('surprise') !== -1){
+    setTimeout(showPrizeSurprise, 800);
+  }
 
 })();
 </script>
